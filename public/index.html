@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Sensor Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@latest/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Sensor Data</h1>
+        <div id="temperature">Temperature: Loading...</div>
+        <div id="humidity">Humidity: Loading...</div>
+        <div id="ldrValue">LDR Value: Loading...</div>
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
+        <canvas id="humidityChart" width="400" height="200"></canvas>
+        <canvas id="ldrChart" width="400" height="200"></canvas>
+    </div>
+    <script>
+        const socket = io();
+
+        // Chart.js data setup
+        const temperatureData = {
+            labels: [],
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: [],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: true,
+            }]
+        };
+
+        const humidityData = {
+            labels: [],
+            datasets: [{
+                label: 'Humidity (%)',
+                data: [],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true,
+            }]
+        };
+
+        const ldrData = {
+            labels: [],
+            datasets: [{
+                label: 'LDR Value',
+                data: [],
+                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                fill: true,
+            }]
+        };
+
+        // Save chart data to local storage
+        const saveToLocalStorage = () => {
+            localStorage.setItem('temperatureData', JSON.stringify(temperatureData));
+            localStorage.setItem('humidityData', JSON.stringify(humidityData));
+            localStorage.setItem('ldrData', JSON.stringify(ldrData));
+        };
+
+        // Load chart data from local storage
+        const loadFromLocalStorage = () => {
+            const savedTemperatureData = JSON.parse(localStorage.getItem('temperatureData'));
+            const savedHumidityData = JSON.parse(localStorage.getItem('humidityData'));
+            const savedLdrData = JSON.parse(localStorage.getItem('ldrData'));
+
+            if (savedTemperatureData && savedHumidityData && savedLdrData) {
+                temperatureData.labels = savedTemperatureData.labels || [];
+                temperatureData.datasets[0].data = savedTemperatureData.datasets[0].data || [];
+                humidityData.labels = savedHumidityData.labels || [];
+                humidityData.datasets[0].data = savedHumidityData.datasets[0].data || [];
+                ldrData.labels = savedLdrData.labels || [];
+                ldrData.datasets[0].data = savedLdrData.datasets[0].data || [];
+            }
+        };
+
+        // Initialize charts after DOM content is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+
+            const temperatureChart = new Chart(document.getElementById('temperatureChart'), {
+                type: 'line',
+                data: temperatureData,
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'second' },
+                        },
+                        y: { beginAtZero: true },
+                    },
+                },
+            });
+
+            const humidityChart = new Chart(document.getElementById('humidityChart'), {
+                type: 'line',
+                data: humidityData,
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'second' },
+                        },
+                        y: { beginAtZero: true },
+                    },
+                },
+            });
+
+            const ldrChart = new Chart(document.getElementById('ldrChart'), {
+                type: 'line',
+                data: ldrData,
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'second' },
+                        },
+                        y: { beginAtZero: true },
+                    },
+                },
+            });
+
+            // Update charts and UI when receiving data
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+
+            socket.on('initial_data', (data) => {
+                const currentTime = new Date();
+                document.getElementById('temperature').innerText = `Temperature: ${data.Temperature} °C`;
+                document.getElementById('humidity').innerText = `Humidity: ${data.Humidity} %`;
+                document.getElementById('ldrValue').innerText = `LDR Value: ${data.LDR}`;
+
+                // Update chart data
+                temperatureData.labels.push(currentTime);
+                temperatureData.datasets[0].data.push(data.Temperature);
+                temperatureChart.update();
+
+                humidityData.labels.push(currentTime);
+                humidityData.datasets[0].data.push(data.Humidity);
+                humidityChart.update();
+
+                ldrData.labels.push(currentTime);
+                ldrData.datasets[0].data.push(data.LDR);
+                ldrChart.update();
+
+                saveToLocalStorage(); // Save the updated data
+            });
+
+            socket.on('sensor_update', (data) => {
+                const currentTime = new Date();
+                document.getElementById('temperature').innerText = `Temperature: ${data.Temperature} °C`;
+                document.getElementById('humidity').innerText = `Humidity: ${data.Humidity} %`;
+                document.getElementById('ldrValue').innerText = `LDR Value: ${data.LDR}`;
+
+                // Update chart data
+                temperatureData.labels.push(currentTime);
+                temperatureData.datasets[0].data.push(data.Temperature);
+                temperatureChart.update();
+
+                humidityData.labels.push(currentTime);
+                humidityData.datasets[0].data.push(data.Humidity);
+                humidityChart.update();
+
+                ldrData.labels.push(currentTime);
+                ldrData.datasets[0].data.push(data.LDR);
+                ldrChart.update();
+
+                saveToLocalStorage(); // Save the updated data
+            });
+        });
+    </script>
+</body>
+</html>
