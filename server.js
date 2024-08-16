@@ -3,7 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const firebaseAdmin = require('firebase-admin');
 
-const credentials = require('/home/vboxuser/Downloads/EL/server1/serviceAccountKey.json'); // Update with your path
+const credentials = require('/serviceAccountKey.json'); // Update with your path
 
 // Initialize Firebase Admin SDK
 firebaseAdmin.initializeApp({
