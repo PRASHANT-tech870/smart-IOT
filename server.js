@@ -8,7 +8,7 @@ const credentials = require('./serviceAccountKey.json'); // Update with your pat
 // Initialize Firebase Admin SDK
 firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(credentials),
-    databaseURL: 'https://trail-befa6-default-rtdb.asia-southeast1.firebasedatabase.app/'
+    databaseURL: 'https://esp32-d27db-default-rtdb.asia-southeast1.firebasedatabase.app/'
 });
 
 const db = firebaseAdmin.database();
@@ -41,7 +41,7 @@ combinedDataRef.on('value', (snapshot) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
