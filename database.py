@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials, db, firestore
 
 # Firebase setup
-cred = credentials.Certificate('/serviceAccountKey.json')
+cred = credentials.Certificate('./serviceAccountKey.json')
 
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred, {
