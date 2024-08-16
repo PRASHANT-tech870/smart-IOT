@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('/home/vboxuser/Downloads/EL/server1/serviceAccountKey.json');
+const serviceAccount = require('/serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
